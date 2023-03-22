@@ -3,20 +3,28 @@
 import os
 import sys
 import argparse
+import mimetypes
 from moviepy.editor import *
 
 # Function to convert the input video file to MP4 format
 def convert_to_mp4(input_file, output_file):
-    try:
-        # Load the input video file using MoviePy
-        video = VideoFileClip(input_file)
-        # Convert the video to MP4 format and save it to the output file
-        video.write_videofile(output_file, codec='libx264', audio_codec='aac')
-        print(f"Converted {input_file} to {output_file}")
-        return True
-    except Exception as e:
-        print(f"Error converting {input_file}: {e}")
+    # Check if the input file is a video
+    file_type, _ = mimetypes.guess_type(input_file)
+    if not file_type or not file_type.startswith('video'):
+        print(f"Skipped {input_file}: Not a video file")
         return False
+
+    # Load the input file as a video clip
+    clip = VideoFileClip(input_file)
+
+    # Write the video clip to the output file in MP4 format
+    clip.write_videofile(output_file, codec='libx264', audio_codec='aac')
+
+    # Log the successful conversion
+    print(f"Converted {input_file} to {output_file}")
+
+    # Return True to indicate a successful conversion
+    return True
 
 def main():
     # Set up command line argument parsing
