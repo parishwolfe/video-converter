@@ -73,4 +73,4 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Acknowledgments
 
-MoviePy - A Python library for video editing.  
+MoviePy - A Python library for video editing.
