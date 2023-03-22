@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import argparse
+from moviepy.editor import *
+
+def convert_to_mp4(input_file, output_file):
+    try:
+        video = VideoFileClip(input_file)
+        video.write_videofile(output_file, codec='libx264', audio_codec='aac')
+        print(f"Converted {input_file} to {output_file}")
+    except Exception as e:
+        print(f"Error converting {input_file}: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Convert video files in input folder to MP4 and move to output folder.")
+    parser.add_argument("input_folder", help="Path to the input folder")
+    parser.add_argument("output_folder", help="Path to the output folder")
+    args = parser.parse_args()
+
+    if not os.path.exists(args.input_folder):
+        print(f"Input folder '{args.input_folder}' does not exist.")
+        sys.exit(1)
+
+    if not os.path.exists(args.output_folder):
+        os.makedirs(args.output_folder)
+
+    supported_extensions = ('.avi', '.mkv', '.flv', '.mov', '.mpg', '.wmv')
+
+    for root, dirs, files in os.walk(args.input_folder):
+        for file in files:
+            if file.lower().endswith(supported_extensions):
+                input_file = os.path.join(root, file)
+                output_file = os.path.join(args.output_folder, os.path.splitext(file)[0] + '.mp4')
+                convert_to_mp4(input_file, output_file)
+
+if __name__ == "__main__":
+    main()
