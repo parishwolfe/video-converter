@@ -1,0 +1,20 @@
+name: Create Release Tag
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  create_tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create Tag
+        id: tag
+        run: |
+          git tag -a ${{ github.event.pull_request.number }}_${{ github.sha }} -m "Release tag for PR #${{ github.event.pull_request.number }}"
+          git push origin ${{ github.event.pull_request.number }}_${{ github.sha }}
+
