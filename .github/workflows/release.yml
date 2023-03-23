@@ -2,32 +2,42 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
+  create_release:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Extract Pull Request Number and Commit ID
-      id: extract_info
-      run: |
-        PR_NUMBER=$(echo ${{ github.event.head_commit.message }} | grep -oP 'Merge pull request #\K\d+')
-        COMMIT_ID=$(echo ${{ github.sha }})
-        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
-        echo "COMMIT_ID=$COMMIT_ID" >> $GITHUB_ENV
-
-    - name: Create Release
-      uses: actions/create-release@v1
-      with:
-        tag_name: ${{ env.PR_NUMBER }}_${{ env.COMMIT_ID }}
-        release_name: Release ${{ env.PR_NUMBER }}_${{ env.COMMIT_ID }}
-        body: |
-          New release ${{ env.PR_NUMBER }}_${{ env.COMMIT_ID }} of your Python project.
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get last tag
+        id: last_tag
+        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
+      - name: Get commits since last tag
+        id: commits
+        run: |
+          echo "Commits since last release:"
+          git log ${{ steps.last_tag.outputs.tag }}..HEAD --pretty=format:'- %s%n'
+        shell: bash
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            This is a new release.
+          draft: false
+          prerelease: false
+      - name: Add commits to release body
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const context = github.context;
+            const { data: { body: currentBody } } = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: context
