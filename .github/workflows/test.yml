@@ -29,3 +29,9 @@ jobs:
       run: |
         cd tests
         python test_main.py
+
+    - name: Create Tag
+      id: tag
+      run: |
+        git tag -a ${{ github.event.pull_request.number }}_${{ github.sha }} -m "Release tag for PR #${{ github.event.pull_request.number }}"
+        git push origin ${{ github.event.pull_request.number }}_${{ github.sha }}
