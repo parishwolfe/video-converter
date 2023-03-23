@@ -1,7 +1,7 @@
 name: Create Release
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -15,8 +15,8 @@ jobs:
     - name: Extract Pull Request Number and Commit ID
       id: extract_info
       run: |
-        PR_NUMBER=$(echo ${{ github.event.pull_request.number }})
-        COMMIT_ID=$(echo ${{ github.event.pull_request.head.sha }})
+        PR_NUMBER=$(echo ${{ github.event.head_commit.message }} | grep -oP 'Merge pull request #\K\d+')
+        COMMIT_ID=$(echo ${{ github.sha }})
         echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
         echo "COMMIT_ID=$COMMIT_ID" >> $GITHUB_ENV
 
